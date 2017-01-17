@@ -1,0 +1,131 @@
+extends layout
+
+block content
+    //can be a large page so nav bar to tak you to different sections is needed
+    .container.theme-showcase
+        ul.nav.nav-tabs(role='tablist')
+            li(role='presentation')
+                a(href='#gameinfo') Game Info
+            li(role='presentation')
+                a(href='#playerstats') Player Stats
+            li(role='presentation')
+                a(href='#streams') Streams
+
+        section#gameinfo
+            h1 GAME INFORMATION
+            if owned == true
+                //if owned game image is located at this url
+                img(src="http://media.steampowered.com/steamcommunity/public/images/apps/" + game.appid + "/" + game.img_logo_url + ".jpg", style="height: 138px; width: 368px;")
+            else
+                //if the game isnt owned by the user it is located at this url
+                img(src=gameNotOwned.header_image, style="height: 138px; width: 368px;")
+            //news section
+            h2 news
+            //create pannel for every news item
+            each item in gameNews.appnews.newsitems
+                .row
+                    .panel.panel-primary
+                        .panel-heading
+                            h3.panel-title #{item.title}
+                        .panel-body
+                            p #{item.contents}
+
+        section#playerstats
+            h1 PLAYER STATS
+            //user owns the game and game stats should be displayed
+            if owned == true
+                h4 Total play time: #{game.playtime_forever} hours
+                h4 Play time in last two weeks: #{game.playtime_2weeks} hours
+                .row
+                    h3 Achievements
+                .row
+                    .col-lg-6
+                        h2 Total Achievements: #{gameSchema.game.availableGameStats.achievements.length}
+                    .col-lg-6
+                        //graph of unlocked achievements
+                        if streamGraphs.progress.error == ''
+                            iframe(width='400', height='300', frameborder='0', scrolling='no', src=streamGraphs.progress.url +'.embed')
+                        else
+                            p graph per day quota hit, blame plotly
+
+                .row
+                    //make panel for every achievement in rows of 6
+                    -for (var j = 0; j < gameSchema.game.availableGameStats.achievements.length; j++)
+                        -if(j == 0 || j% 6 == 0)
+                            .row
+                                -for (var i = j; i < (6+j); i++)
+                                    -if (i >= gameSchema.game.availableGameStats.achievements.length) break;
+                                        .col-sm-2
+                                            if userAchievementProgress.playerstats.achievements[i].achieved == 1
+                                                //green panel if the user has unlocked this achievement
+                                                .panel.panel-success
+                                                    .panel-heading
+                                                        h3.panel-title #{gameSchema.game.availableGameStats.achievements[i].displayName}
+
+                                                    .panel-body
+                                                        .row
+                                                            .col-lg-4
+                                                            img(src=gameSchema.game.availableGameStats.achievements[i].icon)
+                                                        .row
+                                                            .col-lg-2
+                                                            p #{globalAchievementProgress.achievementpercentages.achievements[i].percent} % unlock rate
+                                            else
+                                                //red panel if the user has not unlocked this achievement
+                                                .panel.panel-danger
+                                                    .panel-heading
+                                                        h3.panel-title #{gameSchema.game.availableGameStats.achievements[i].displayName}
+
+                                                    .panel-body
+                                                        .row
+                                                            .col-lg-3
+                                                            .col-lg-3
+                                                                img(src=gameSchema.game.availableGameStats.achievements[i].icon)
+                                                        .row
+                                                            p #{globalAchievementProgress.achievementpercentages.achievements[i].percent} % global unlock rate
+            else
+                //the user doesnt own this game so dont show game stats
+                h2 you don't own this game so there are no stats to show :(
+        section#streams
+        h1 STREAMS
+        if twitchStreams.streams.length == 0
+            //no streams were found for this game so dont try to show any
+            h2 No one is streaming this game right now :(
+        else
+            .col-lg-8
+                //panel for each stream
+                each item in twitchStreams.streams
+                    .row
+                        a(href = item.channel.url, target='blank')
+                            .panel.panel-primary
+                                .panel-heading
+                                    h3.panel-title #{item.channel.display_name} - #{item.channel.status}
+                                .panel-body
+                                    .col-sm-6
+                                        img(src= item.preview.medium)
+                                    .col-sm-6
+                                        .row
+                                            p Current Viewers: #{item.viewers}
+                                            p Total Views: #{item.channel.views}
+                                            p Followers: #{item.channel.followers}
+                                            p Language: #{item.channel.language}
+            .col-lg-4
+                //graphs for each stream stat
+                //dont render the graph if there are any errors
+                #currentViewers.row
+                    h3 Current Viewers
+                    if streamGraphs.currentViews.error == ''
+                        iframe(width='400', height='300', frameborder='0', scrolling='no', src=streamGraphs.currentViews.url +'.embed')
+                    else
+                        p graph per day quota hit, blame plotly
+                #totalViewers.row
+                    h3 Total Views
+                    if streamGraphs.totalViews.error == ''
+                        iframe(width='400', height='300', frameborder='0', scrolling='no', src=streamGraphs.totalViews.url +'.embed')
+                    else
+                        p graph per day quota hit, blame plotly
+                #followers.row
+                    h3 Followers
+                    if streamGraphs.followers.error == ''
+                        iframe(width='400', height='300', frameborder='0', scrolling='no', src=streamGraphs.followers.url +'.embed')
+                    else
+                        p graph per day quota hit, blame plotly

@@ -1,0 +1,28 @@
+//
+   Created by Jack on 14-Sep-16.
+
+extends layout
+
+block content
+    .container.theme-showcase
+        .row
+            .col-sm-6
+                img(src=friend.response.players[0].avatarfull)
+            .col-sm-6
+                h1 #{friend.response.players[0].personaname}
+        h1 Recent Games
+        if userRecentGames.total_count == 0
+            h2 this person hasnt played any games recently
+        else
+            each item in userRecentGames
+                .row
+                    .panel.panel-primary
+                        .panel-heading
+                            h3.panel-title #{item.name}
+                        .panel-body
+                            .col-sm-4
+                                img(src="http://media.steampowered.com/steamcommunity/public/images/apps/" + item.appid + "/" + item.img_logo_url + ".jpg")
+                            .col-sm-4 hours played: #{item.playtime_forever}
+                            .col-sm-4
+                                a(href="/game?gameid=" + item.appid)
+                                    button.btn.btn-lg.btn-primary(type='button') more

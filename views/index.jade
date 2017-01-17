@@ -1,0 +1,59 @@
+extends layout
+
+block content
+    //user isnt logged in so show them a landing page with a login link
+    if !user
+        .jumbotron
+            .container.theme-showcase
+                h1 LOCOMOTION
+                p Your steam powered buddy. Find new games to play with friends or get better at old ones.
+                p Just sign in with Steam to get started
+        .container.theme-showcase
+            a(href="auth/steam", style="float: left; position: relative; left: 50%;")
+                image(src="images/steamLogin.png")
+
+
+    else
+        .container.theme-showcase
+            h1 Recent Games
+            //if the user hasnt played any games recently
+            if userRecentGames.response.total_count == 0
+                h1 you havn't played any games recently
+            else
+                //panel for each recent game
+                each item in userRecentGames.response.games
+                    .row
+                        .panel.panel-primary
+                            .panel-heading
+                                h3.panel-title #{item.name}
+                            .panel-body
+                                .col-sm-4
+                                    img(src="http://media.steampowered.com/steamcommunity/public/images/apps/" + item.appid + "/" + item.img_logo_url + ".jpg")
+                                .col-sm-4 hours played: #{item.playtime_forever}
+                                .col-sm-4
+                                    a(href="/game?gameid=" + item.appid)
+                                        button.btn.btn-lg.btn-primary(type='button') more
+
+            h1 Friend List
+            // if the user doesnt have any friends
+            if userFriendsList == null
+                h1 looks like you have no friends, feels bad man :(
+            else
+                //panel for every friend
+                -for (var j = 0; j < userFriendsList.response.players.length; j++)
+                    -if(j == 0 || j% 3 == 0)
+                        .row
+                            -for (var i = j; i < (3+j); i++)
+                                -if (i >= userFriendsList.response.players.length) break;
+                                    .col-sm-4
+                                        .panel.panel-success
+                                            .panel-heading
+                                                -var status;
+                                                h3.panel-title #{userFriendsList.response.players[i].personaname + ": " + userFriendsList.response.players[i].personastate}
+
+                                            .panel-body
+                                                .col-sm-4
+                                                    img(src=userFriendsList.response.players[i].avatarmedium)
+                                                .col-sm-4
+                                                    a(href="/friend?userid=" + userFriendsList.response.players[i].steamid)
+                                                        button.btn.btn-lg.btn-success(type='button') more

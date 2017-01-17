@@ -1,0 +1,28 @@
+//
+   Created by Jack on 18-Sep-16.
+
+extends layout
+
+block content
+    .container.theme-showcase
+        h2 All Games
+        //pannel for every game in rows of 3
+        if games == null
+            h3 looks like you dont own any games
+        else
+            -for (var j = 0; j < games.length; j++)
+                -if(j == 0 || j% 3 == 0)
+                    .row
+                        -for (var i = j; i < (3+j); i++)
+                            -if (i >= games.length) break;
+                                .col-sm-4
+                                    .panel.panel-primary
+                                        .panel-heading
+                                            h3.panel-title #{games[i].name}
+                                        .panel-body
+                                            .col-sm-4
+                                                img(src="http://media.steampowered.com/steamcommunity/public/images/apps/" + games[i].appid + "/" + games[i].img_logo_url + ".jpg")
+                                            .col-sm-4
+                                            .col-sm-4
+                                                a(href="/game?gameid=" + games[i].appid)
+                                                    button.btn.btn-lg.btn-primary(type='button') more
